@@ -1,0 +1,12 @@
+[submodule "lib/esphttpclient"]
+	path = lib/esphttpclient
+	url = https://github.com/Caerbannog/esphttpclient.git
+[submodule "lib/espsaphcp"]
+	path = lib/espsaphcp
+	url = https://github.com/jpenninkhof/espsaphcp.git
+[submodule "lib/espdht22"]
+	path = lib/espdht22
+	url = https://github.com/jpenninkhof/espdht22.git
+[submodule "lib/espuart"]
+	path = lib/espuart
+	url = https://github.com/jpenninkhof/espuart.git
