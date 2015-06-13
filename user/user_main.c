@@ -48,34 +48,39 @@ LOCAL void ICACHE_FLASH_ATTR hcp_callback(char * response, int http_status, char
 LOCAL void ICACHE_FLASH_ATTR dht22_cb(void *arg)
 {
 	static char data[256];
-	static char temp[10];
-	static char hum[10];
+	static char temp_str[10];
+	static char hum_str[10];
 	struct dht_sensor_data* r;
-	float lastTemp, lastHum;
+	static int lastTemp, lastHum;
 
 	os_timer_disarm(&dht22_timer);
 	switch(connState)
 	{
 		case WIFI_CONNECTED:
 			r = DHTRead();
-			lastTemp = r->temperature;
-			lastHum = r->humidity;
 			if(r->success)
 			{
+				int temp = (int)(r->temperature * 10);
+				int hum = (int)(r->humidity * 10);
+				os_sprintf(temp_str, "%d.%d",(int)(temp / 10), temp - ((int)(temp / 10)) * 10);
+				os_sprintf(hum_str, "%d.%d",(int)(hum / 10), hum - ((int)(hum / 10)) * 10);
+				os_printf("Temperature: %s *C, Humidity: %s %%\r\n", temp_str, hum_str);
+
+				if (lastTemp != temp || lastHum != hum)
+				{
+					lastTemp = temp;
+					lastHum = hum;
 					wifi_get_ip_info(STATION_IF, &ipConfig);
-					os_sprintf(temp, "%d.%d",(int)(lastTemp),(int)((lastTemp - (int)lastTemp)*100));
-					os_sprintf(hum, "%d.%d",(int)(lastHum),(int)((lastHum - (int)lastHum)*100));
-					os_printf("Temperature: %s *C, Humidity: %s %%\r\n", temp, hum);
-
 					os_sprintf(data,
-							"{\"mode\":\"sync\", \"messageType\":\"1\",\"messages\":[{"
-								"\"Humidity\": %s, "
-								"\"Temperature\": %s,"
-								"\"timestamp\":0"
+							"{\"mode\":\"sync\",\"messageType\":\"%s\",\"messages\":[{"
+								"\"Humidity\": %s,"
+								"\"Temperature\": %s"
 							"}]}",
-							hum, temp);
+							HCP_MESSAGETYPE, hum_str, temp_str);
 					hcp_send(HCP_ACCOUNT, HCP_LANDSCAPEHOST, HCP_DEVICEID, HCP_DEVICETOKEN, data, hcp_callback);
-
+				} else {
+					os_printf("No changes since last reading.\r\n");
+				}
 			} else {
 				os_printf("Error reading temperature and humidity.\r\n");
 			}
@@ -96,7 +101,7 @@ static void ICACHE_FLASH_ATTR wifi_check_ip(void *arg)
 			wifi_get_ip_info(STATION_IF, &ipConfig);
 			if(ipConfig.ip.addr != 0) {
 				connState = WIFI_CONNECTED;
-				os_printf("WiFi connected, wait DHT22 timer...\r\n");
+				os_printf("WiFi connected\r\n");
 			} else {
 				connState = WIFI_CONNECTING_ERROR;
 				os_printf("WiFi connected, ip.addr is null\r\n");
@@ -152,7 +157,7 @@ void user_init(void)
 	uart_init(BIT_RATE_115200,0);
 	// Enable system messages
 	system_set_os_print(1);
-	os_printf("\r\nSDK version:%s\n", system_get_sdk_version());
+	os_printf("\r\nSDK version: %s\n", system_get_sdk_version());
 	os_printf("System init...\r\n");
 
 	os_printf("ESP8266 is %s mode, restarting in %s mode...\r\n", WiFiMode[wifi_get_opmode()], WiFiMode[STATION_MODE]);

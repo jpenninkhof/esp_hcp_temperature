@@ -11,7 +11,8 @@
 // HCP details server address
 #define HCP_LANDSCAPEHOST "hanatrial.ondemand.com"
 #define HCP_ACCOUNT "p508741trial"
-#define HCP_DEVICEID "af9ebf3b-8ab2-43af-9d57-df1ce54aa1be"
-#define HCP_DEVICETOKEN "33acca81139be5bff4e0ccd0961a83b"
+#define HCP_DEVICEID "51a6bc16-79ba-497e-9632-f976067360da"
+#define HCP_DEVICETOKEN "c85e8a30c79a482263f208efd6fb23b"
+#define HCP_MESSAGETYPE "1"
 
 #endif
